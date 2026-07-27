@@ -12,28 +12,39 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 
 @router.post("/register", response_model=AuthResponse, status_code=status.HTTP_201_CREATED)
 def register(payload: RegisterRequest, db: Session = Depends(get_db)) -> AuthResponse:
-    existing = db.scalar(select(User).where(User.email == payload.email))
-    if existing:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="An account with this email already exists.")
+    try:
+        existing = db.scalar(select(User).where(User.email == payload.email))
+        if existing:
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="An account with this email already exists.")
 
-    user = User(
-        email=payload.email,
-        display_name=payload.display_name,
-        password_hash=hash_password(payload.password),
-    )
-    db.add(user)
-    db.commit()
-    db.refresh(user)
+        user = User(
+            email=payload.email,
+            display_name=payload.display_name,
+            password_hash=hash_password(payload.password),
+        )
+        db.add(user)
+        db.commit()
+        db.refresh(user)
 
-    token = create_access_token(user.id, user.email)
-    return AuthResponse(token=token, user=UserOut.model_validate(user, from_attributes=True))
+        token = create_access_token(user.id, user.email)
+        return AuthResponse(token=token, user=UserOut.model_validate(user, from_attributes=True))
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Register error: {str(e)}")
 
 
 @router.post("/login", response_model=AuthResponse)
 def login(payload: LoginRequest, db: Session = Depends(get_db)) -> AuthResponse:
-    user = db.scalar(select(User).where(User.email == payload.email))
-    if user is None or not verify_password(payload.password, user.password_hash):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid email or password.")
+    try:
+        user = db.scalar(select(User).where(User.email == payload.email))
+        if user is None or not verify_password(payload.password, user.password_hash):
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid email or password.")
 
-    token = create_access_token(user.id, user.email)
-    return AuthResponse(token=token, user=UserOut.model_validate(user, from_attributes=True))
+        token = create_access_token(user.id, user.email)
+        return AuthResponse(token=token, user=UserOut.model_validate(user, from_attributes=True))
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Login error: {str(e)}")
+
