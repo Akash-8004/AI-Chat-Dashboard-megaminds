@@ -1,11 +1,19 @@
+import os
+import tempfile
 from sqlalchemy import create_engine
 from sqlalchemy.orm import DeclarativeBase, sessionmaker
 
 from app.config import settings
 
-connect_args = {"check_same_thread": False} if settings.database_url.startswith("sqlite") else {}
-engine = create_engine(settings.database_url, connect_args=connect_args)
+db_url = settings.database_url
+if (db_url == "sqlite:///./dev.db" or db_url.startswith("sqlite:///.")) and os.name != "nt":
+    tmp_db_path = os.path.join(tempfile.gettempdir(), "megaminds_dev.db")
+    db_url = f"sqlite:///{tmp_db_path}"
+
+connect_args = {"check_same_thread": False} if db_url.startswith("sqlite") else {}
+engine = create_engine(db_url, connect_args=connect_args)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
 
 
 class Base(DeclarativeBase):
