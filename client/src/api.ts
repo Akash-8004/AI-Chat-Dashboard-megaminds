@@ -1,6 +1,14 @@
 import type { Conversation, ConversationDetail, Persona, User } from './types';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:4000/api';
+let baseUrl = (import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:4000/api').trim();
+if (baseUrl.endsWith('/')) {
+  baseUrl = baseUrl.slice(0, -1);
+}
+if (!baseUrl.endsWith('/api')) {
+  baseUrl = `${baseUrl}/api`;
+}
+const API_BASE_URL = baseUrl;
+
 
 async function request<T>(path: string, options: RequestInit = {}, token?: string): Promise<T> {
   const response = await fetch(`${API_BASE_URL}${path}`, {

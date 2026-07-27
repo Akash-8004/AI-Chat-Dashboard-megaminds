@@ -28,6 +28,12 @@ def on_startup() -> None:
     seed_personas()
 
 
+@app.get("/")
+def root() -> dict[str, str]:
+    return {"message": "Megaminds AI Chat Dashboard API is live", "status": "ok"}
+
+
 @app.get("/api/health")
 def health() -> dict[str, str]:
     return {"status": "ok"}
+
