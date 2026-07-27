@@ -10,11 +10,12 @@ app = FastAPI(title="Megaminds AI Chat Dashboard API")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[settings.client_origin],
-    allow_credentials=True,
+    allow_origins=["*"],
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 
 app.include_router(auth.router, prefix="/api")
 app.include_router(personas.router, prefix="/api")
