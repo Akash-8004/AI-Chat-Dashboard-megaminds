@@ -1,0 +1,29 @@
+# Dependencies
+node_modules/
+client/node_modules/
+server/node_modules/
+
+# Python cache & virtual environment
+__pycache__/
+server/app/__pycache__/
+server/app/routes/__pycache__/
+server/app/services/__pycache__/
+*.pyc
+.venv/
+server/.venv/
+
+# Build outputs & temporary files
+client/dist/
+server/dist/
+.dist/
+.DS_Store
+Thumbs.db
+.vscode/
+
+# Database files
+server/dev.db
+server/dev.db-journal
+
+# Environment variables & secrets
+.env
+server/.env
